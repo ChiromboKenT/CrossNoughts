@@ -24,12 +24,52 @@ Cross_img = pygame.image.load("Sprites/X.png", "X")
 
 clock = pygame.time.Clock()
 
+class GameState():
+    def __init__(self,currentPlayer):
+        self.player = currentPlayer
+        self.gameResult = 0
+        self.GameBoard = Board()
+    
+    def isWinningMove(self):
+        board = self.GameBoard.board
+        for row_sum in np.nditer(np.sum(board,1)):
+            if(row_sum == 3 or row_sum == -3):
+                gameResult = self.player
+                return True
+        for col_sum in np.nditer(np.sum(board,0)):
+            if(col_sum == 3 or col_sum == -3):
+                gameResult = self.player
+                return True
+        if(np.diagonal(board).sum() == 3 or np.diagonal(board).sum() == -3  
+            or np.flipud(board).diagonal().sum() == -3 or np.flipud(board).diagonal().sum() == 3):
+            gameResult = self.player
+            return True
+        return False
+
+
+
+
+    
+
 class Board():
     def __init__(self, rows,columns):
         self.board = np.zeros((rows,columns))
 
     def playerToken(self,row,col,player):
         self.board[row][col] = player
+
+    def isValidPosition(self, row,col):
+        return self.board[row][col] == 0
+
+    def isBoardFull(self):
+        for pos in np.nditer(self.board):
+            if pos == 0:
+                return False
+        return True
+    def winningMove(self, currentPlayer):
+        for row in range(self.board.shape[0]):
+            if self.board[row][0] == currentPlayer and self.board[row][1] == currentPlayer and self.board[row][2] == currentPlayer:
+                pass
 
     def printBoard(self):
         print(self.board)
@@ -60,13 +100,11 @@ def re_Render():
 
     pygame.display.update()
 
-class GameState():
-    def __init__(self):
-        pass 
+
 
 class GameBoard():
-    def __init__(self):
-        pass
+    def __init__(self,currentPlayer):
+        self.player = currentPlayer
 
 
 #Initialise game state
@@ -75,7 +113,11 @@ pygame.mouse.set_visible(False)
 desertBoard = Board(3,3)
 desertBoard.playerToken(1,2,playerCircle)
 desertBoard.printBoard()
+PlayerTurn = 1
+CurrentPlayer = 0
 while gameRunning:
+    CurrentPlayer = PlayerTurn
+
     clock.tick(30)
     #Create Event
     events = pygame.event.get()
@@ -88,5 +130,6 @@ while gameRunning:
     re_Render()
     
     pygame.display.update()
+    PlayerTurn *= -1
 
 pygame.quit()
