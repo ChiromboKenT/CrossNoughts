@@ -1,7 +1,7 @@
 import os
+import numpy as np
 import pygame
 from pygame.constants import QUIT
-from pygame.display import set_caption
 
 
 #Force Centering the Window
@@ -13,6 +13,9 @@ mainWindow = pygame.display.set_mode((800,600))
 xOffset = 100;
 yOffset = 80;
 
+playerCross = -1
+playerCircle = 1
+
 #Load Assets 
 bg_desert = pygame.image.load("Backgrounds/desert.jpg","Bg-desert")
 cursor_img = pygame.image.load("Cursors/desertCursor2.png", "DesertCursor")
@@ -21,6 +24,16 @@ Cross_img = pygame.image.load("Sprites/X.png", "X")
 
 clock = pygame.time.Clock()
 
+class Board():
+    def __init__(self, rows,columns):
+        self.board = np.zeros((rows,columns))
+
+    def playerToken(self,row,col,player):
+        self.board[row][col] = player
+
+    def printBoard(self):
+        print(self.board)
+    
 
 
 def draw_rect_alpha(surface, color, pos):
@@ -59,6 +72,9 @@ class GameBoard():
 #Initialise game state
 gameRunning = True
 pygame.mouse.set_visible(False)
+desertBoard = Board(3,3)
+desertBoard.playerToken(1,2,playerCircle)
+desertBoard.printBoard()
 while gameRunning:
     clock.tick(30)
     #Create Event
