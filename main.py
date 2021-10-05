@@ -2,6 +2,7 @@ import os
 import math as mt
 import numpy as np
 import pygame
+from random import sample
 from pygame.constants import MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT
 
 
@@ -53,6 +54,38 @@ class GameState():
     
    
 
+def CPUTurn(board):
+    nonePlayed = np.transpose(np.nonzero(board == 0))
+    
+    bestMove = nonePlayed[0]
+    if(nonePlayed.shape[0] >=2):
+        Choices = sample(list(nonePlayed),2)
+        sum = 0
+        bestMove = Choices[1]
+
+        for choice in Choices:
+            scoreBoard = board.copy()
+            scoreBoard[choice[0]][choice[1]] = playerCross
+            
+            if(np.sum(scoreBoard[0]) < sum):
+                sum = np.sum(scoreBoard[0])
+                bestMove = choice
+            elif(np.sum(scoreBoard[0]) < sum):
+                sum = np.sum(scoreBoard[0])
+                bestMove = choice
+            elif(np.diagonal(scoreBoard).sum() < sum):
+                sum = np.diagonal(scoreBoard).sum()
+                bestMove = choice
+            elif(np.flipud(scoreBoard).diagonal().sum() < sum):
+                sum = np.flipud(scoreBoard).diagonal().sum()
+                bestMove = choice
+    
+    return bestMove
+    
+            
+
+
+
 class Board():
     def __init__(self, rows,columns,boardImage):
         self.board = np.zeros((rows,columns))
@@ -67,6 +100,8 @@ class Board():
             if( self.isWinningMove(player)):
                 self.GameOver(player)
                 return False
+        else:
+            return 3
         if(self.isBoardFull()):
             self.GameOver(2)
             return False
@@ -179,7 +214,7 @@ nextTurn = 1
 winButtonCoord =  pygame.Rect((xOffset + 178,yOffset + 278),(250,80))
 #Game Loop
 while gameRunning:
-    CurrentPlayer = PlayerTurn
+    
 
     clock.tick(30)
     #Create Event
@@ -197,19 +232,29 @@ while gameRunning:
                 nextTurn = 1
                 CurrentPlayer = 0
                 GameState.gameResult = 0
-            if(nextTurn):
+            if(nextTurn and PlayerTurn == playerCircle):
                 row = mt.floor((yOffset + event.pos[1])/146) - 1
                 column = mt.floor((xOffset + event.pos[0])/200) -1
                 nextTurn = currentBoard.playerToken(row,column,CurrentPlayer)
-                PlayerTurn *= -1
+                if(nextTurn != 3):
+                    PlayerTurn *= -1
+           
             clicked = False
-            
+    
+    CurrentPlayer = PlayerTurn
     mainWindow.fill((0,0,0))
     #Display Update
     re_Render(currentBoard)
     pygame.display.update()
 
+    if(nextTurn and PlayerTurn == playerCross):
+        pygame.time.wait(100)
+        bestMove = CPUTurn(currentBoard.board)
+        nextTurn = currentBoard.playerToken(bestMove[0],bestMove[1],CurrentPlayer)        
+        if(nextTurn != 3):
+            PlayerTurn *= -1
 
+    CurrentPlayer = PlayerTurn
     
 
 pygame.quit()
